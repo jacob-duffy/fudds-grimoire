@@ -1,0 +1,26 @@
+# tables.yml — example loot tables for Fudd's Grimoire
+tables:
+  blacksmith_inventory:
+    description: "Items typically sold by a blacksmith"
+    entries:
+      - item: "Iron Sword"
+        weight: 10
+        tags: [weapon, common]
+      - item: "Steel Longsword"
+        weight: 4
+        tags: [weapon, uncommon]
+      - item: "Reinforced Shield"
+        weight: 3
+        tags: [armor, uncommon]
+
+  small_chest_lvl1:
+    description: "Small chest for level 1 encounters"
+    entries:
+      - reference: blacksmith_inventory
+        weight: 1
+      - item: "Healing Herbs"
+        weight: 6
+        tags: [consumable, common]
+      - item: "Silver Trinket"
+        weight: 1
+        tags: [trinket, uncommon]

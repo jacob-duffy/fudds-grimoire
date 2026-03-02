@@ -1,0 +1,53 @@
+[project]
+name = "fudds-grimoire"
+version = "0.1.0"
+description = "A TUI tool for dungeon masters to create, manage, and run configurable YAML loot tables for tabletop RPGs."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["textual>=0.80.0", "pyyaml>=6.0"]
+
+[project.scripts]
+grimoire = "grimoire.main:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "black>=24.3",
+    "isort>=5.12",
+    "flake8>=6.0",
+    "flake8-pyproject>=0.2",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv]
+package = true
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q --cov=src/grimoire --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["tests/*", ".venv/*", "src/grimoire/main.py"]
+
+[tool.coverage.report]
+exclude_lines = ["if __name__ == .__main__.:"]
