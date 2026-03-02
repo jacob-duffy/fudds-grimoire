@@ -17,6 +17,7 @@ dev = [
     "isort>=5.12",
     "flake8>=6.0",
     "flake8-pyproject>=0.2",
+    "pre-commit>=3.7",
 ]
 
 [build-system]
