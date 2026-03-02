@@ -27,6 +27,9 @@ textual.log
 # Logs
 *.log
 
+# User-managed loot data (not tracked — each user provides their own)
+.data/**/*.yml
+
 # OS artifacts
 .DS_Store
 Thumbs.db

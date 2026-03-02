@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/fudds-grimoire/items.schema.json",
+  "title": "Fudd's Grimoire — Item Catalog",
+  "description": "A catalog of reusable DnD 5e item definitions. Items defined here are referenced in loot tables via item_ref: <id>.",
+  "type": "object",
+  "required": ["items"],
+  "additionalProperties": false,
+  "properties": {
+    "items": {
+      "type": "object",
+      "description": "Map of snake_case item ID to item definition. The key becomes the item_ref value used in loot tables.",
+      "additionalProperties": { "$ref": "#/$defs/Item" }
+    }
+  },
+  "$defs": {
+    "Rarity": {
+      "type": "string",
+      "description": "The DnD 5e rarity tier of the item.",
+      "enum": ["common", "uncommon", "rare", "very rare", "legendary", "artifact", "varies"]
+    },
+    "ItemType": {
+      "type": "string",
+      "description": "The broad category of the item.",
+      "enum": [
+        "weapon",
+        "armor",
+        "shield",
+        "consumable",
+        "potion",
+        "scroll",
+        "wand",
+        "staff",
+        "rod",
+        "ring",
+        "wondrous item",
+        "tool",
+        "ammunition",
+        "trinket",
+        "currency",
+        "gem",
+        "art object",
+        "trade good",
+        "vehicle",
+        "other"
+      ]
+    },
+    "WeaponProperty": {
+      "type": "string",
+      "enum": [
+        "ammunition", "finesse", "heavy", "light", "loading",
+        "range", "reach", "special", "thrown", "two-handed",
+        "versatile", "silvered", "adamantine"
+      ]
+    },
+    "DamageDice": {
+      "type": "object",
+      "description": "A damage dice expression. Both dice notation and damage type are required.",
+      "required": ["dice", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "dice": {
+          "type": "string",
+          "pattern": "^\\d+d\\d+(\\+\\d+)?$",
+          "examples": ["1d6", "1d8", "2d6", "1d10+2"]
+        },
+        "type": {
+          "type": "string",
+          "description": "Damage type.",
+          "enum": [
+            "slashing", "piercing", "bludgeoning",
+            "fire", "cold", "lightning", "thunder",
+            "acid", "poison", "necrotic", "radiant",
+            "psychic", "force"
+          ]
+        }
+      }
+    },
+    "Item": {
+      "type": "object",
+      "description": "A reusable DnD 5e item definition.",
+      "required": ["name", "type", "rarity"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the item as shown to the player.",
+          "minLength": 1,
+          "examples": ["Iron Sword", "+1 Longsword", "Potion of Healing"]
+        },
+        "type": { "$ref": "#/$defs/ItemType" },
+        "rarity": { "$ref": "#/$defs/Rarity" },
+        "description": {
+          "type": "string",
+          "description": "Flavour text or full mechanical description of the item."
+        },
+        "value_gp": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Gold piece value (DMG suggested prices).",
+          "examples": [10, 50, 500, 5000]
+        },
+        "weight_lb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight in pounds."
+        },
+        "attunement": {
+          "type": "boolean",
+          "description": "Whether the item requires attunement.",
+          "default": false
+        },
+        "attunement_requirements": {
+          "type": "string",
+          "description": "Specific attunement restriction, if any.",
+          "examples": ["by a spellcaster", "by a paladin", "by a creature of good alignment"]
+        },
+        "magical": {
+          "type": "boolean",
+          "description": "Whether this item is considered magical for the purposes of spells like Detect Magic and overcoming resistance. Defaults to false for mundane items; set true for any magic item.",
+          "default": false
+        },
+        "weapon": {
+          "type": "object",
+          "description": "Weapon-specific stats. Use when type is 'weapon'.",
+          "additionalProperties": false,
+          "properties": {
+            "damage": { "$ref": "#/$defs/DamageDice" },
+            "damage_two_handed": {
+              "$ref": "#/$defs/DamageDice",
+              "description": "Versatile (two-handed grip) damage, if the weapon has the versatile property."
+            },
+            "properties": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/WeaponProperty" },
+              "uniqueItems": true,
+              "description": "Weapon properties from the PHB."
+            },
+            "range_normal_ft": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Normal range in feet (ranged or thrown weapons)."
+            },
+            "range_long_ft": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Long range (disadvantage) in feet."
+            },
+            "magic_bonus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "description": "Magic attack and damage bonus: +1, +2, or +3."
+            }
+          }
+        },
+        "armor": {
+          "type": "object",
+          "description": "Armor or shield stats. Use when type is 'armor' or 'shield'.",
+          "additionalProperties": false,
+          "properties": {
+            "base_ac": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Base armor class provided."
+            },
+            "dex_bonus": {
+              "type": "string",
+              "enum": ["none", "max+2", "full"],
+              "description": "How Dexterity modifier applies to the AC calculation."
+            },
+            "strength_requirement": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum Strength score to avoid the speed penalty."
+            },
+            "stealth_disadvantage": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether wearing this armor imposes disadvantage on Stealth checks."
+            },
+            "magic_bonus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "description": "Magic AC bonus: +1, +2, or +3."
+            }
+          }
+        },
+        "consumable": {
+          "type": "object",
+          "description": "Consumable stats for single-use items (potions, scrolls). The item is destroyed on use. For rechargeable charged items (wands, staves, rings, rods) use the 'wondrous' block instead.",
+          "additionalProperties": false,
+          "properties": {
+            "charges": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of charges or uses before the item is expended."
+            },
+            "spell": {
+              "type": "string",
+              "description": "Name of the spell stored in or triggered by this item.",
+              "examples": ["Cure Wounds", "Fireball", "Identify"]
+            },
+            "spell_level": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9,
+              "description": "Level of the spell (0 = cantrip)."
+            },
+            "healing_dice": {
+              "type": "string",
+              "pattern": "^\\d+d\\d+(\\+\\d+)?$",
+              "description": "Healing provided, e.g. '2d4+2'."
+            }
+          }
+        },
+        "wondrous": {
+          "type": "object",
+          "description": "Properties for rechargeable charged magic items: wands, staves, rods, rings, and other wondrous items with limited uses. Use 'consumable' instead for single-use items (potions, scrolls).",
+          "additionalProperties": false,
+          "properties": {
+            "charges": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of charges the item can hold."
+            },
+            "recharge": {
+              "type": "string",
+              "description": "How the item regains charges. Use a dice expression for a partial daily recharge (e.g. '1d6+1'), 'dawn' for a full recharge at dawn, or 'never' for a one-time-use item that crumbles when empty.",
+              "examples": ["1d6+1", "1d8", "dawn", "never"]
+            },
+            "activation": {
+              "type": "string",
+              "description": "The action economy cost to activate the item.",
+              "enum": ["action", "bonus action", "reaction", "no action", "1 minute", "10 minutes", "1 hour"]
+            },
+            "effects": {
+              "type": "array",
+              "description": "List of spells, abilities, or effects the item can produce, optionally with charge costs.",
+              "items": { "type": "string" },
+              "examples": [["Charm Person (1 charge)", "Suggestion (2 charges)", "Dominate Person (3 charges)"]]
+            }
+          }
+        },
+        "currency": {
+          "type": "object",
+          "description": "Currency denomination. Use when type is 'currency'. The quantity of coins is set by the 'quantity' field in the loot table entry.",
+          "required": ["denomination"],
+          "additionalProperties": false,
+          "properties": {
+            "denomination": {
+              "type": "string",
+              "description": "Coin type.",
+              "enum": ["cp", "sp", "ep", "gp", "pp"]
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Free-form tags for filtering, search, and UI display.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "source": {
+          "type": "string",
+          "description": "Source book abbreviation.",
+          "examples": ["PHB", "DMG", "XGE", "TCE", "MPMM", "homebrew"]
+        }
+      }
+    }
+  }
+}

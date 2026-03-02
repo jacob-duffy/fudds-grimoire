@@ -7,4 +7,15 @@
 - Use `uv pytest` to run the test suite.
 - Tests are located in the `tests/` directory.
 - Test coverage must be at least 90% with no failures for a new feature or bug fix to be merged.
-- YAML loot tables are defined in `.yml` files, typically located in the `.data/` directory.
+- Loot data lives in two sub-directories under `.data/`:
+  - `.data/items/` — reusable item catalog files (one per category, e.g. `weapons.yml`, `consumables.yml`). Validated against `.schemas/items.schema.json`.
+  - `.data/tables/` — one loot table per file. Validated against `.schemas/loot-table.schema.json`.
+- **All `.yml` files under `.data/` are user-dependent and git-ignored.** Each user creates and manages their own local data files. The schemas in `.schemas/` are still tracked.
+- Items are separated into two scopes:
+  - **General/reusable** — defined in `.data/items/` catalog files and referenced anywhere via `item_ref: <id>`. Use this for any item that could appear in more than one table.
+  - **Table-specific (one-off)** — defined inline with an `item:` block directly inside a loot table entry. Use this only for items unique to that specific table's context (e.g. story trinkets, named unique drops). These items are not accessible from other tables.
+- Cross-file `item_ref` existence cannot be enforced by JSON Schema — the app loader validates it at runtime.
+- Always include the correct `# yaml-language-server: $schema=` comment as the first line of every YAML file:
+  - Tables: `# yaml-language-server: $schema=../../.schemas/loot-table.schema.json`
+  - Items: `# yaml-language-server: $schema=../../.schemas/items.schema.json`
+- When running the Textual application, always quit it cleanly using the app's built-in exit mechanism (e.g., `app.exit()` in code, or pressing `Ctrl+Q` within the running TUI) before closing the terminal. Killing the terminal process directly without properly exiting the Textual app will corrupt the terminal session.
