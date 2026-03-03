@@ -12,6 +12,7 @@ grimoire = "grimoire.main:main"
 [dependency-groups]
 dev = [
     "pytest>=7.4",
+    "pytest-asyncio>=0.23",
     "pytest-cov>=4.1",
     "black>=24.3",
     "isort>=5.12",
@@ -46,6 +47,7 @@ extend-ignore = ["E203"]
 minversion = "7.0"
 addopts = "-q --cov=src/grimoire --cov-report=term-missing --cov-fail-under=90"
 testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 omit = ["tests/*", ".venv/*", "src/grimoire/main.py"]

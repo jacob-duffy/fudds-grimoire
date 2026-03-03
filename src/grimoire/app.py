@@ -1,7 +1,8 @@
 """Fudd's Grimoire — main Textual application."""
 
-from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header
+from textual.app import App
+
+from grimoire.ui.screens import MainMenuScreen
 
 
 class GrimoireApp(App):
@@ -10,6 +11,9 @@ class GrimoireApp(App):
     TITLE = "Fudd's Grimoire"
     SUB_TITLE = "Loot Table Manager"
 
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
+    SCREENS = {
+        "main_menu": MainMenuScreen,
+    }
+
+    def on_mount(self) -> None:
+        self.push_screen("main_menu")
