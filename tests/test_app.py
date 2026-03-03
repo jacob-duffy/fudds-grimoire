@@ -8,6 +8,7 @@ from grimoire.ui.screens import (
     MainMenuScreen,
     PlaceholderScreen,
     RollItemScreen,
+    RollTableScreen,
 )
 
 
@@ -95,7 +96,7 @@ async def test_all_menu_items_navigate_to_expected_screens():
     expected = {
         "menu-add-item": AddItemScreen,
         "menu-add-table": PlaceholderScreen,
-        "menu-roll-table": PlaceholderScreen,
+        "menu-roll-table": RollTableScreen,
         "menu-roll-item": RollItemScreen,
     }
     for item_id, screen_type in expected.items():

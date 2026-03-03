@@ -54,6 +54,26 @@ class LootTableLoader:
         results.sort(key=lambda t: t[0])
         return results
 
+    def find_by_id(self, table_id: str) -> dict | None:
+        """Return the loaded table dict for the given *table_id*, or ``None``.
+
+        Scans every ``.yml`` file in *data_dir* for the first whose ``id``
+        field equals *table_id*.  Returns ``None`` when no match is found or
+        when the directory does not exist.
+        """
+        if not self.data_dir.exists():
+            return None
+        for path in sorted(self.data_dir.glob("*.yml")):
+            try:
+                with open(path, "r", encoding="utf-8") as fh:
+                    data = yaml.safe_load(fh)
+                if isinstance(data, dict) and data.get("id") == table_id:
+                    data.setdefault("entries", [])
+                    return data
+            except Exception:  # noqa: BLE001
+                pass
+        return None
+
     def load(self, path: Path) -> dict:
         """Load and return a loot table from *path*.
 

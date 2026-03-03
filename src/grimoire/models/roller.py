@@ -1,8 +1,10 @@
 """Item rolling engine — filter catalog items and randomly sample one."""
 
 import random
+import re
 
 from grimoire.loaders.items import ItemCatalogLoader
+from grimoire.loaders.tables import LootTableLoader
 from grimoire.models.constants import RARITY_RANK, ItemType
 
 # Re-export RARITY_RANK so existing callers that import it from this module
@@ -10,6 +12,8 @@ from grimoire.models.constants import RARITY_RANK, ItemType
 __all__ = [
     "RARITY_RANK",
     "roll_item",
+    "roll_table",
+    "parse_rolls",
     "filter_items",
     "load_all_items",
     "roll_currency",
@@ -234,3 +238,127 @@ def roll_item(
         return None
 
     return _rng.choice(candidates)
+
+
+# ---------------------------------------------------------------------------
+# Loot-table rolling
+# ---------------------------------------------------------------------------
+
+_DICE_RE = re.compile(r"^(\d+)d(\d+)(?:\+(\d+))?$")
+
+
+def parse_rolls(rolls_field: int | str | None, rng: random.Random | None = None) -> int:
+    """Evaluate a table's ``rolls`` field and return the number of rolls to make.
+
+    *rolls_field* may be:
+    - ``None`` or missing → returns 1.
+    - a positive integer → returned directly.
+    - a dice string such as ``"1d4"`` or ``"2d6+1"`` → rolled and returned.
+
+    Raises :class:`ValueError` for unrecognisable strings.
+    """
+    if rolls_field is None:
+        return 1
+    if isinstance(rolls_field, int):
+        return max(1, rolls_field)
+
+    match = _DICE_RE.match(str(rolls_field).strip())
+    if not match:
+        raise ValueError(f"Cannot parse rolls expression: {rolls_field!r}")
+
+    _rng = rng or random.Random()
+    num_dice = int(match.group(1))
+    die_faces = int(match.group(2))
+    modifier = int(match.group(3) or 0)
+    result = sum(_rng.randint(1, die_faces) for _ in range(num_dice)) + modifier
+    return max(1, result)
+
+
+def roll_table(
+    table: dict,
+    catalog_loader: ItemCatalogLoader | None = None,
+    table_loader: LootTableLoader | None = None,
+    rng: random.Random | None = None,
+    _visited: frozenset[str] | None = None,
+) -> list[dict]:
+    """Roll on a loot table and return a list of resolved item dicts.
+
+    The number of rolls is determined by the table's ``rolls`` field (defaults
+    to 1).  Each roll independently picks a weighted entry from ``entries``.
+
+    Entry resolution
+    ----------------
+    ``item``       — inline dict is returned directly; ``_id`` is synthesised
+                     from the item's ``name`` when absent.
+    ``item_ref``   — looked up across all catalog files; falls back to a stub
+                     dict ``{"_id": id, "name": id}`` when not found or when
+                     no *catalog_loader* is provided.
+    ``reference``  — when *table_loader* is provided the referenced table is
+                     loaded and rolled recursively (cycles are detected via
+                     *_visited* and fall back to a stub).  Without a loader a
+                     stub ``{"_id": "_ref:<id>", "name": "[Table: <id>]"}`` is
+                     returned.
+
+    Returns an empty list when the table has no entries.
+    """
+    _rng = rng or random.Random()
+    entries = table.get("entries", [])
+    if not entries:
+        return []
+
+    # Build item index lazily only if needed.
+    _item_index: dict[str, dict] | None = None
+
+    def _get_index() -> dict[str, dict]:
+        nonlocal _item_index
+        if _item_index is None and catalog_loader is not None:
+            _item_index = {
+                item["_id"]: item
+                for item in load_all_items(catalog_loader)
+                if "_id" in item
+            }
+        return _item_index or {}
+
+    weights = [max(int(entry.get("weight", 1)), 1) for entry in entries]
+    num_rolls = parse_rolls(table.get("rolls"), _rng)
+
+    results: list[dict] = []
+    for _ in range(num_rolls):
+        entry = _rng.choices(entries, weights=weights, k=1)[0]
+
+        if "item" in entry:
+            item = dict(entry["item"])
+            item.setdefault("_id", item.get("name", "inline_item"))
+            results.append(item)
+
+        elif "item_ref" in entry:
+            item_id = str(entry["item_ref"])
+            found = _get_index().get(item_id)
+            if found is not None:
+                results.append(found)
+            else:
+                results.append({"_id": item_id, "name": item_id})
+
+        elif "reference" in entry:
+            ref_id = str(entry["reference"])
+            _vis = _visited or frozenset()
+            if table_loader is not None and ref_id not in _vis:
+                sub_table = table_loader.find_by_id(ref_id)
+                if sub_table is not None:
+                    sub_results = roll_table(
+                        sub_table,
+                        catalog_loader=catalog_loader,
+                        table_loader=table_loader,
+                        rng=_rng,
+                        _visited=_vis | {ref_id},
+                    )
+                    results.extend(sub_results)
+                    continue
+            # No loader, table not found, or cycle — return stub.
+            results.append({"_id": f"_ref:{ref_id}", "name": f"[Table: {ref_id}]"})
+
+        else:
+            # Malformed entry — skip silently.
+            pass
+
+    return results

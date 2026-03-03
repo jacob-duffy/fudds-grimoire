@@ -14,6 +14,7 @@ from grimoire.loaders.tables import LootTableLoader
 from grimoire.ui.screens.add_item import AddItemScreen
 from grimoire.ui.screens.placeholder import PlaceholderScreen
 from grimoire.ui.screens.roll_item import RollItemScreen
+from grimoire.ui.screens.roll_table import RollTableScreen
 
 
 class MainMenuScreen(Screen):
@@ -163,7 +164,12 @@ class MainMenuScreen(Screen):
         elif item_id == "menu-add-table":
             self.app.push_screen(PlaceholderScreen("Add New Table"))
         elif item_id == "menu-roll-table":
-            self.app.push_screen(PlaceholderScreen("Roll Table"))
+            self.app.push_screen(
+                RollTableScreen(
+                    table_loader=LootTableLoader(),
+                    catalog_loader=ItemCatalogLoader(),
+                )
+            )
         elif item_id == "menu-roll-item":
             self.app.push_screen(RollItemScreen(loader=ItemCatalogLoader()))
         # --- Monsters ---
