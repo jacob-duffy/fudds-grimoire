@@ -10,42 +10,19 @@ from textual.widgets import Button, Footer, Header, Input, Label, Select, Switch
 
 from grimoire.loaders.items import TYPE_TO_SUBFORM, ItemCatalogLoader
 from grimoire.loaders.tables import LootTableLoader
-from grimoire.models.constants import (
-    SUBFORM_IDS,
-    Activation,
-    DamageType,
-    Denomination,
-    DexBonus,
-    ItemType,
-    Rarity,
-    WeaponProperty,
+from grimoire.models.constants import SUBFORM_IDS
+from grimoire.ui.constants import (
+    ACTIVATION_OPTIONS,
+    DAMAGE_TYPES,
+    DENOMINATION_OPTIONS,
+    DEX_BONUS_OPTIONS,
+    ITEM_TYPES,
+    MAGIC_BONUS_OPTIONS,
+    RARITIES,
+    WEAPON_PROPERTIES,
 )
-from grimoire.utils import slugify
-
-# Flat lists for Select widgets
-ACTIVATION_OPTIONS: list[str] = list(Activation)
-DAMAGE_TYPES: list[str] = list(DamageType)
-DENOMINATION_OPTIONS: list[str] = list(Denomination)
-DEX_BONUS_OPTIONS: list[str] = list(DexBonus)
-ITEM_TYPES: list[str] = list(ItemType)
-RARITIES: list[str] = list(Rarity)
-WEAPON_PROPERTIES: list[str] = list(WeaponProperty)
-
-
-def _opts(values: list[str]) -> list[tuple[str, str]]:
-    """Convert a list of strings to (label, value) Select option tuples."""
-    return [(v, v) for v in values]
-
-
-def _num(text: str) -> int | float:
-    """Parse *text* as a number.
-
-    Returns an ``int`` when the value is a whole number (e.g. ``"5"`` → ``5``),
-    otherwise a ``float`` (e.g. ``"5.5"`` → ``5.5``).
-    Raises ``ValueError`` on non-numeric input.
-    """
-    value = float(text)
-    return int(value) if value == int(value) else value
+from grimoire.ui.utils import opts
+from grimoire.utils import num, slugify
 
 
 class AddItemScreen(Screen):
@@ -145,7 +122,7 @@ class AddItemScreen(Screen):
             with Horizontal(classes="field-row"):
                 yield Label("Item Type *", classes="field-label")
                 yield Select(
-                    _opts(ITEM_TYPES),
+                    opts(ITEM_TYPES),
                     prompt="Select type…",
                     id="field-type",
                     classes="field-input",
@@ -160,7 +137,7 @@ class AddItemScreen(Screen):
             with Horizontal(classes="field-row"):
                 yield Label("Rarity *", classes="field-label")
                 yield Select(
-                    _opts(RARITIES),
+                    opts(RARITIES),
                     prompt="Select rarity…",
                     id="field-rarity",
                     classes="field-input",
@@ -237,7 +214,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Damage Type", classes="field-label")
                     yield Select(
-                        _opts(DAMAGE_TYPES),
+                        opts(DAMAGE_TYPES),
                         prompt="Select damage type…",
                         id="field-weapon-dmg-type",
                         classes="field-input",
@@ -268,7 +245,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Magic Bonus", classes="field-label")
                     yield Select(
-                        [("None", ""), ("+1", "1"), ("+2", "2"), ("+3", "3")],
+                        MAGIC_BONUS_OPTIONS,
                         prompt="None",
                         id="field-weapon-magic-bonus",
                         classes="field-input",
@@ -287,7 +264,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Dex Bonus", classes="field-label")
                     yield Select(
-                        _opts(DEX_BONUS_OPTIONS),
+                        opts(DEX_BONUS_OPTIONS),
                         prompt="Select…",
                         id="field-armor-dex-bonus",
                         classes="field-input",
@@ -309,7 +286,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Magic Bonus", classes="field-label")
                     yield Select(
-                        [("None", ""), ("+1", "1"), ("+2", "2"), ("+3", "3")],
+                        MAGIC_BONUS_OPTIONS,
                         prompt="None",
                         id="field-armor-magic-bonus",
                         classes="field-input",
@@ -367,7 +344,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Activation", classes="field-label")
                     yield Select(
-                        _opts(ACTIVATION_OPTIONS),
+                        opts(ACTIVATION_OPTIONS),
                         prompt="Select…",
                         id="field-wondrous-activation",
                         classes="field-input",
@@ -386,7 +363,7 @@ class AddItemScreen(Screen):
                 with Horizontal(classes="field-row"):
                     yield Label("Denomination", classes="field-label")
                     yield Select(
-                        _opts(DENOMINATION_OPTIONS),
+                        opts(DENOMINATION_OPTIONS),
                         prompt="Select…",
                         id="field-currency-denom",
                         classes="field-input",
@@ -513,12 +490,12 @@ class AddItemScreen(Screen):
             item_data["description"] = desc
         if vgp := self._inp("field-value-gp"):
             try:
-                item_data["value_gp"] = _num(vgp)
+                item_data["value_gp"] = num(vgp)
             except ValueError:
                 pass
         if wlb := self._inp("field-weight-lb"):
             try:
-                item_data["weight_lb"] = _num(wlb)
+                item_data["weight_lb"] = num(wlb)
             except ValueError:
                 pass
         attunement = self.query_one("#field-attunement", Switch).value
@@ -537,90 +514,17 @@ class AddItemScreen(Screen):
         subform = TYPE_TO_SUBFORM.get(item_type)
 
         if subform == "weapon":
-            weapon: dict = {}
-            dice = self._inp("field-weapon-dice")
-            dmg_type = self._sel("field-weapon-dmg-type")
-            if dice and dmg_type:
-                weapon["damage"] = {"dice": dice, "type": dmg_type}
-            if props_raw := self._inp("field-weapon-props"):
-                weapon["properties"] = [
-                    p.strip() for p in props_raw.split(",") if p.strip()
-                ]
-            if rn := self._inp("field-weapon-range-normal"):
-                try:
-                    weapon["range_normal_ft"] = int(rn)
-                except ValueError:
-                    pass
-            if rl := self._inp("field-weapon-range-long"):
-                try:
-                    weapon["range_long_ft"] = int(rl)
-                except ValueError:
-                    pass
-            if mb := self._sel("field-weapon-magic-bonus"):
-                if mb:
-                    weapon["magic_bonus"] = int(mb)
-            if weapon:
-                item_data["weapon"] = weapon
-
+            if data := self._collect_weapon():
+                item_data["weapon"] = data
         elif subform == "armor":
-            armor: dict = {}
-            if bac := self._inp("field-armor-base-ac"):
-                try:
-                    armor["base_ac"] = int(bac)
-                except ValueError:
-                    pass
-            if db := self._sel("field-armor-dex-bonus"):
-                armor["dex_bonus"] = db
-            if sr := self._inp("field-armor-str-req"):
-                try:
-                    armor["strength_requirement"] = int(sr)
-                except ValueError:
-                    pass
-            if self.query_one("#field-armor-stealth", Switch).value:
-                armor["stealth_disadvantage"] = True
-            if mb := self._sel("field-armor-magic-bonus"):
-                if mb:
-                    armor["magic_bonus"] = int(mb)
-            if armor:
-                item_data["armor"] = armor
-
+            if data := self._collect_armor():
+                item_data["armor"] = data
         elif subform == "consumable":
-            consumable: dict = {}
-            if ch := self._inp("field-consumable-charges"):
-                try:
-                    consumable["charges"] = int(ch)
-                except ValueError:
-                    pass
-            if sp := self._inp("field-consumable-spell"):
-                consumable["spell"] = sp
-            if sl := self._inp("field-consumable-spell-level"):
-                try:
-                    consumable["spell_level"] = int(sl)
-                except ValueError:
-                    pass
-            if hd := self._inp("field-consumable-healing"):
-                consumable["healing_dice"] = hd
-            if consumable:
-                item_data["consumable"] = consumable
-
+            if data := self._collect_consumable():
+                item_data["consumable"] = data
         elif subform == "wondrous":
-            wondrous: dict = {}
-            if ch := self._inp("field-wondrous-charges"):
-                try:
-                    wondrous["charges"] = int(ch)
-                except ValueError:
-                    pass
-            if rc := self._inp("field-wondrous-recharge"):
-                wondrous["recharge"] = rc
-            if act := self._sel("field-wondrous-activation"):
-                wondrous["activation"] = act
-            if eff_raw := self._inp("field-wondrous-effects"):
-                wondrous["effects"] = [
-                    e.strip() for e in eff_raw.split(",") if e.strip()
-                ]
-            if wondrous:
-                item_data["wondrous"] = wondrous
-
+            if data := self._collect_wondrous():
+                item_data["wondrous"] = data
         elif subform == "currency":
             if denom := self._sel("field-currency-denom"):
                 item_data["currency"] = {"denomination": denom}
@@ -647,3 +551,90 @@ class AddItemScreen(Screen):
                 )
         except Exception as exc:  # noqa: BLE001
             status.update(f"Error saving: {exc}")
+
+    # ------------------------------------------------------------------
+    # Sub-form collectors
+    # ------------------------------------------------------------------
+
+    def _collect_weapon(self) -> dict:
+        """Read weapon sub-form fields and return a populated dict (may be empty)."""
+        weapon: dict = {}
+        dice = self._inp("field-weapon-dice")
+        dmg_type = self._sel("field-weapon-dmg-type")
+        if dice and dmg_type:
+            weapon["damage"] = {"dice": dice, "type": dmg_type}
+        if props_raw := self._inp("field-weapon-props"):
+            weapon["properties"] = [
+                p.strip() for p in props_raw.split(",") if p.strip()
+            ]
+        if rn := self._inp("field-weapon-range-normal"):
+            try:
+                weapon["range_normal_ft"] = int(rn)
+            except ValueError:
+                pass
+        if rl := self._inp("field-weapon-range-long"):
+            try:
+                weapon["range_long_ft"] = int(rl)
+            except ValueError:
+                pass
+        if mb := self._sel("field-weapon-magic-bonus"):
+            if mb:
+                weapon["magic_bonus"] = int(mb)
+        return weapon
+
+    def _collect_armor(self) -> dict:
+        """Read armor sub-form fields and return a populated dict (may be empty)."""
+        armor: dict = {}
+        if bac := self._inp("field-armor-base-ac"):
+            try:
+                armor["base_ac"] = int(bac)
+            except ValueError:
+                pass
+        if db := self._sel("field-armor-dex-bonus"):
+            armor["dex_bonus"] = db
+        if sr := self._inp("field-armor-str-req"):
+            try:
+                armor["strength_requirement"] = int(sr)
+            except ValueError:
+                pass
+        if self.query_one("#field-armor-stealth", Switch).value:
+            armor["stealth_disadvantage"] = True
+        if mb := self._sel("field-armor-magic-bonus"):
+            if mb:
+                armor["magic_bonus"] = int(mb)
+        return armor
+
+    def _collect_consumable(self) -> dict:
+        """Read consumable subform fields and return a populated dict (may be empty)."""
+        consumable: dict = {}
+        if ch := self._inp("field-consumable-charges"):
+            try:
+                consumable["charges"] = int(ch)
+            except ValueError:
+                pass
+        if sp := self._inp("field-consumable-spell"):
+            consumable["spell"] = sp
+        if sl := self._inp("field-consumable-spell-level"):
+            try:
+                consumable["spell_level"] = int(sl)
+            except ValueError:
+                pass
+        if hd := self._inp("field-consumable-healing"):
+            consumable["healing_dice"] = hd
+        return consumable
+
+    def _collect_wondrous(self) -> dict:
+        """Read wondrous sub-form fields and return a populated dict (may be empty)."""
+        wondrous: dict = {}
+        if ch := self._inp("field-wondrous-charges"):
+            try:
+                wondrous["charges"] = int(ch)
+            except ValueError:
+                pass
+        if rc := self._inp("field-wondrous-recharge"):
+            wondrous["recharge"] = rc
+        if act := self._sel("field-wondrous-activation"):
+            wondrous["activation"] = act
+        if eff_raw := self._inp("field-wondrous-effects"):
+            wondrous["effects"] = [e.strip() for e in eff_raw.split(",") if e.strip()]
+        return wondrous

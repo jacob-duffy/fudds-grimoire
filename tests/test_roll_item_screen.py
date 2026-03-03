@@ -5,7 +5,7 @@ from textual.screen import Screen
 from textual.widgets import Input, Label, Select, SelectionList
 
 from grimoire.loaders.items import ItemCatalogLoader
-from grimoire.ui.roll_item import RollItemScreen
+from grimoire.ui.screens.roll_item import RollItemScreen
 
 # ---------------------------------------------------------------------------
 # Test app helper

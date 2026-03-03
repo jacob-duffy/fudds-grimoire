@@ -13,50 +13,15 @@ from textual.widgets import (
     Select,
     SelectionList,
 )
-from textual.widgets.selection_list import Selection
 
 from grimoire.loaders.items import ItemCatalogLoader
-from grimoire.models.constants import RARITY_RANK, ItemType, Rarity
 from grimoire.models.roller import roll_item
-
-ITEM_TYPES: list[str] = list(ItemType)
-RARITIES: list[str] = list(Rarity)
-
-RARITY_MODE_OPTIONS = [
-    ("Manual", "manual"),
-    ("= (exactly)", "eq"),
-    ("\u2265 (at least)", "geq"),
-    ("> (above)", "gt"),
-    ("\u2264 (at most)", "leq"),
-    ("< (below)", "lt"),
-]
-
-RARITY_LABELS: dict[str, str] = {
-    "common": "Common",
-    "uncommon": "Uncommon",
-    "rare": "Rare",
-    "very rare": "Very Rare",
-    "legendary": "Legendary",
-    "artifact": "Artifact",
-    "varies": "Varies",
-}
-
-
-def _rarity_selections() -> list[Selection]:
-    labels = {
-        "common": "Common",
-        "uncommon": "Uncommon",
-        "rare": "Rare",
-        "very rare": "Very Rare",
-        "legendary": "Legendary",
-        "artifact": "Artifact",
-        "varies": "Varies",
-    }
-    return [Selection(labels.get(r, r.title()), r) for r in RARITIES]
-
-
-def _type_selections() -> list[Selection]:
-    return [Selection(t.title(), t) for t in ITEM_TYPES]
+from grimoire.ui.constants import RARITY_MODE_OPTIONS, TYPE_MODE_OPTIONS
+from grimoire.ui.utils import (
+    rarity_comparator_options,
+    rarity_selections,
+    type_selections,
+)
 
 
 class RollItemScreen(Screen):
@@ -237,13 +202,13 @@ class RollItemScreen(Screen):
                         allow_blank=False,
                     )
                 yield SelectionList[str](
-                    *_rarity_selections(),
+                    *rarity_selections(),
                     id="rarity-select",
                     classes="filter-list",
                 )
                 with Horizontal(id="rarity-comparator-row"):
                     yield Select(
-                        [(RARITY_LABELS.get(r, r.title()), r) for r in RARITY_RANK],
+                        rarity_comparator_options(),
                         prompt="Select reference rarity…",
                         id="rarity-ref",
                     )
@@ -251,13 +216,13 @@ class RollItemScreen(Screen):
                 with Horizontal(id="types-header"):
                     yield Label("Item Types", classes="filter-section-title")
                     yield Select(
-                        [("Include", "include"), ("Exclude", "exclude")],
+                        TYPE_MODE_OPTIONS,
                         value="include",
                         id="types-mode",
                         allow_blank=False,
                     )
                 yield SelectionList[str](
-                    *_type_selections(),
+                    *type_selections(),
                     id="types-select",
                     classes="filter-list",
                 )

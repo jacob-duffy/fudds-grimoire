@@ -3,9 +3,12 @@
 from textual.widgets import Footer, Header, Label, ListView
 
 from grimoire.app import GrimoireApp
-from grimoire.ui.add_item import AddItemScreen
-from grimoire.ui.roll_item import RollItemScreen
-from grimoire.ui.screens import MainMenuScreen, PlaceholderScreen
+from grimoire.ui.screens import (
+    AddItemScreen,
+    MainMenuScreen,
+    PlaceholderScreen,
+    RollItemScreen,
+)
 
 
 def test_app_title():

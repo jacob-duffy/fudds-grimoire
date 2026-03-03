@@ -15,3 +15,14 @@ def slugify(name: str) -> str:
     slug = name.lower().strip()
     slug = re.sub(r"[^a-z0-9]+", "_", slug)
     return slug.strip("_")
+
+
+def num(text: str) -> int | float:
+    """Parse *text* as a number.
+
+    Returns an ``int`` when the value is a whole number (e.g. ``"5"`` → ``5``),
+    otherwise a ``float`` (e.g. ``"5.5"`` → ``5.5``).
+    Raises ``ValueError`` on non-numeric input.
+    """
+    value = float(text)
+    return int(value) if value == int(value) else value

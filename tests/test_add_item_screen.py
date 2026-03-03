@@ -11,36 +11,37 @@ from textual.widgets import Input, Label, Select, Switch
 from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.loaders.tables import _TABLE_SCHEMA_COMMENT, LootTableLoader
 from grimoire.models.item import SUBFORM_IDS
-from grimoire.ui.add_item import AddItemScreen, _num
+from grimoire.ui.screens.add_item import AddItemScreen
+from grimoire.utils import num
 
 # ---------------------------------------------------------------------------
-# _num() helper unit tests
+# num() helper unit tests
 # ---------------------------------------------------------------------------
 
 
 def test_num_whole_number_returns_int():
-    assert _num("5") == 5
-    assert isinstance(_num("5"), int)
+    assert num("5") == 5
+    assert isinstance(num("5"), int)
 
 
 def test_num_zero_returns_int():
-    assert _num("0") == 0
-    assert isinstance(_num("0"), int)
+    assert num("0") == 0
+    assert isinstance(num("0"), int)
 
 
 def test_num_fractional_returns_float():
-    assert _num("0.5") == 0.5
-    assert isinstance(_num("0.5"), float)
+    assert num("0.5") == 0.5
+    assert isinstance(num("0.5"), float)
 
 
 def test_num_large_whole_number_returns_int():
-    assert _num("1000") == 1000
-    assert isinstance(_num("1000"), int)
+    assert num("1000") == 1000
+    assert isinstance(num("1000"), int)
 
 
 def test_num_invalid_raises_value_error():
     with pytest.raises(ValueError):
-        _num("abc")
+        num("abc")
 
 
 # ---------------------------------------------------------------------------
