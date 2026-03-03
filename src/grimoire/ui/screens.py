@@ -5,8 +5,10 @@ from textual.containers import Middle
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
+from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.loaders.tables import LootTableLoader
 from grimoire.ui.add_item import AddItemScreen
+from grimoire.ui.roll_item import RollItemScreen
 
 
 class PlaceholderScreen(Screen):
@@ -107,4 +109,4 @@ class MainMenuScreen(Screen):
         elif item_id == "menu-roll-table":
             self.app.push_screen(PlaceholderScreen("Roll Table"))
         elif item_id == "menu-roll-item":
-            self.app.push_screen(PlaceholderScreen("Roll Item"))
+            self.app.push_screen(RollItemScreen(loader=ItemCatalogLoader()))

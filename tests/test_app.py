@@ -4,6 +4,7 @@ from textual.widgets import Footer, Header, Label, ListView
 
 from grimoire.app import GrimoireApp
 from grimoire.ui.add_item import AddItemScreen
+from grimoire.ui.roll_item import RollItemScreen
 from grimoire.ui.screens import MainMenuScreen, PlaceholderScreen
 
 
@@ -82,7 +83,7 @@ async def test_all_menu_items_navigate_to_expected_screens():
         "menu-add-item": AddItemScreen,
         "menu-add-table": PlaceholderScreen,
         "menu-roll-table": PlaceholderScreen,
-        "menu-roll-item": PlaceholderScreen,
+        "menu-roll-item": RollItemScreen,
     }
     for item_id, screen_type in expected.items():
         app = GrimoireApp()
