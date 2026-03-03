@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A TUI tool for dungeon masters to create, manage, and run configurable YAML loot tables for tabletop RPGs."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["textual>=0.80.0", "pyyaml>=6.0"]
+dependencies = ["textual>=0.80.0", "pyyaml>=6.0", "pydantic>=2.0"]
 
 [project.scripts]
 grimoire = "grimoire.main:main"

@@ -8,20 +8,28 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Input, Label, Select, Switch
 
-from grimoire.loaders.items import ItemCatalogLoader
+from grimoire.loaders.items import TYPE_TO_SUBFORM, ItemCatalogLoader
 from grimoire.loaders.tables import LootTableLoader
-from grimoire.models.item import (
-    ACTIVATION_OPTIONS,
-    DAMAGE_TYPES,
-    DENOMINATION_OPTIONS,
-    DEX_BONUS_OPTIONS,
-    ITEM_TYPES,
-    RARITIES,
+from grimoire.models.constants import (
     SUBFORM_IDS,
-    TYPE_TO_SUBFORM,
-    WEAPON_PROPERTIES,
-    slugify,
+    Activation,
+    DamageType,
+    Denomination,
+    DexBonus,
+    ItemType,
+    Rarity,
+    WeaponProperty,
 )
+from grimoire.utils import slugify
+
+# Flat lists for Select widgets
+ACTIVATION_OPTIONS: list[str] = list(Activation)
+DAMAGE_TYPES: list[str] = list(DamageType)
+DENOMINATION_OPTIONS: list[str] = list(Denomination)
+DEX_BONUS_OPTIONS: list[str] = list(DexBonus)
+ITEM_TYPES: list[str] = list(ItemType)
+RARITIES: list[str] = list(Rarity)
+WEAPON_PROPERTIES: list[str] = list(WeaponProperty)
 
 
 def _opts(values: list[str]) -> list[tuple[str, str]]:

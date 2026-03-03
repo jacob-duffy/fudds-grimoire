@@ -3,18 +3,19 @@
 import random
 
 from grimoire.loaders.items import ItemCatalogLoader
-from grimoire.models.item import ITEM_TYPES
+from grimoire.models.constants import RARITY_RANK, ItemType
 
-# Ordinal rank for each named rarity.  "varies" is intentionally absent
-# because it has no meaningful position in the scale.
-RARITY_RANK: dict[str, int] = {
-    "common": 0,
-    "uncommon": 1,
-    "rare": 2,
-    "very rare": 3,
-    "legendary": 4,
-    "artifact": 5,
-}
+# Re-export RARITY_RANK so existing callers that import it from this module
+# continue to work without modification.
+__all__ = [
+    "RARITY_RANK",
+    "roll_item",
+    "filter_items",
+    "load_all_items",
+    "roll_currency",
+]
+
+ITEM_TYPES = list(ItemType)
 
 # Defaults used by the currency shortcut when no wealth range is specified.
 CURRENCY_DEFAULT_MIN: float = 0.0

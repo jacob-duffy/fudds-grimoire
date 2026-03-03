@@ -16,8 +16,11 @@ from textual.widgets import (
 from textual.widgets.selection_list import Selection
 
 from grimoire.loaders.items import ItemCatalogLoader
-from grimoire.models.item import ITEM_TYPES, RARITIES
-from grimoire.models.roller import RARITY_RANK, roll_item
+from grimoire.models.constants import RARITY_RANK, ItemType, Rarity
+from grimoire.models.roller import roll_item
+
+ITEM_TYPES: list[str] = list(ItemType)
+RARITIES: list[str] = list(Rarity)
 
 RARITY_MODE_OPTIONS = [
     ("Manual", "manual"),

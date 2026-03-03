@@ -4,13 +4,51 @@ from pathlib import Path
 
 import yaml
 
-from grimoire.models.item import TYPE_TO_FILE
-
 # Default data directory, resolved relative to the process working directory.
 DEFAULT_DATA_DIR = Path(".data") / "items"
 
 # Schema comment written to the top of every catalog file.
 _SCHEMA_COMMENT = "# yaml-language-server: $schema=../../.schemas/items.schema.json\n"
+
+# Maps item type → catalog filename under .data/items/
+TYPE_TO_FILE: dict[str, str] = {
+    "weapon": "weapons.yml",
+    "armor": "armor.yml",
+    "shield": "armor.yml",
+    "consumable": "consumables.yml",
+    "potion": "consumables.yml",
+    "scroll": "consumables.yml",
+    "wand": "wondrous.yml",
+    "staff": "wondrous.yml",
+    "rod": "wondrous.yml",
+    "ring": "wondrous.yml",
+    "wondrous item": "wondrous.yml",
+    "tool": "tools.yml",
+    "ammunition": "ammunition.yml",
+    "trinket": "trinkets.yml",
+    "currency": "currency.yml",
+    "gem": "valuables.yml",
+    "art object": "valuables.yml",
+    "trade good": "valuables.yml",
+    "vehicle": "vehicles.yml",
+    "other": "items.yml",
+}
+
+# Maps item type → which sub-form group to display in the UI (None = no sub-form)
+TYPE_TO_SUBFORM: dict[str, str | None] = {
+    "weapon": "weapon",
+    "armor": "armor",
+    "shield": "armor",
+    "consumable": "consumable",
+    "potion": "consumable",
+    "scroll": "consumable",
+    "wand": "wondrous",
+    "staff": "wondrous",
+    "rod": "wondrous",
+    "ring": "wondrous",
+    "wondrous item": "wondrous",
+    "currency": "currency",
+}
 
 
 class ItemCatalogLoader:

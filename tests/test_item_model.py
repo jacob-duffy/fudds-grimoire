@@ -1,5 +1,6 @@
-"""Tests for grimoire.models.item constants and helpers."""
+"""Tests for grimoire.models constants, enums, and helpers."""
 
+from grimoire.loaders.items import TYPE_TO_FILE, TYPE_TO_SUBFORM
 from grimoire.models.item import (
     ACTIVATION_OPTIONS,
     DAMAGE_TYPES,
@@ -8,11 +9,9 @@ from grimoire.models.item import (
     ITEM_TYPES,
     RARITIES,
     SUBFORM_IDS,
-    TYPE_TO_FILE,
-    TYPE_TO_SUBFORM,
     WEAPON_PROPERTIES,
-    slugify,
 )
+from grimoire.utils import slugify
 
 # -- slugify ------------------------------------------------------------------
 
