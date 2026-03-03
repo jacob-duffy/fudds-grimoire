@@ -1,7 +1,7 @@
 """Tests for grimoire.models constants, enums, and helpers."""
 
 from grimoire.loaders.items import TYPE_TO_FILE, TYPE_TO_SUBFORM
-from grimoire.models.item import (
+from grimoire.models.constants import (
     ACTIVATION_OPTIONS,
     DAMAGE_TYPES,
     DENOMINATION_OPTIONS,

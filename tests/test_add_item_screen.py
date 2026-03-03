@@ -10,7 +10,7 @@ from textual.widgets import Input, Label, Select, Switch
 
 from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.loaders.tables import _TABLE_SCHEMA_COMMENT, LootTableLoader
-from grimoire.models.item import SUBFORM_IDS
+from grimoire.models.constants import SUBFORM_IDS
 from grimoire.ui.screens.add_item import AddItemScreen
 from grimoire.utils import num
 

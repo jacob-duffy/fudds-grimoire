@@ -25,14 +25,23 @@ def test_app_registers_main_menu_screen():
     assert app.SCREENS["main_menu"] is MainMenuScreen
 
 
-def test_main_menu_has_four_options():
-    """MainMenuScreen should define exactly four menu options."""
-    assert len(MainMenuScreen.MENU_OPTIONS) == 4
+def test_main_menu_has_three_sections():
+    """MainMenuScreen should define exactly three sections."""
+    assert len(MainMenuScreen.SECTIONS) == 3
 
 
-def test_main_menu_option_labels():
-    """MainMenuScreen menu options should include all expected actions."""
-    labels = [label for _, label in MainMenuScreen.MENU_OPTIONS]
+def test_main_menu_section_ids():
+    """MainMenuScreen sections should include Loot, Monsters, and Party."""
+    ids = [sid for sid, _title, _opts in MainMenuScreen.SECTIONS]
+    assert "loot" in ids
+    assert "monsters" in ids
+    assert "party" in ids
+
+
+def test_main_menu_loot_option_labels():
+    """Loot section should include all four core actions."""
+    loot_opts = next(opts for sid, _t, opts in MainMenuScreen.SECTIONS if sid == "loot")
+    labels = [label for _, label in loot_opts]
     assert "Add New Item" in labels
     assert "Add New Table" in labels
     assert "Roll Table" in labels
@@ -40,11 +49,12 @@ def test_main_menu_option_labels():
 
 
 async def test_main_menu_screen_mounts():
-    """MainMenuScreen should render the menu list and title when mounted."""
+    """MainMenuScreen should render all section lists and title when mounted."""
     app = GrimoireApp()
     async with app.run_test():
         assert isinstance(app.screen, MainMenuScreen)
-        assert app.screen.query_one("#main-menu", ListView) is not None
+        for sid, _title, _opts in MainMenuScreen.SECTIONS:
+            assert app.screen.query_one(f"#section-{sid}", ListView) is not None
         assert app.screen.query_one("#menu-title", Label) is not None
         assert app.screen.query_one(Header) is not None
         assert app.screen.query_one(Footer) is not None

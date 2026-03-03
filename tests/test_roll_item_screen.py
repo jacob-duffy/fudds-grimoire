@@ -5,6 +5,7 @@ from textual.screen import Screen
 from textual.widgets import Input, Label, Select, SelectionList
 
 from grimoire.loaders.items import ItemCatalogLoader
+from grimoire.models.constants import ITEM_TYPES, RARITIES
 from grimoire.ui.screens.roll_item import RollItemScreen
 
 # ---------------------------------------------------------------------------
@@ -78,8 +79,6 @@ async def test_initial_status_bar_empty(tmp_path):
 
 async def test_rarity_select_has_all_rarities(tmp_path):
     """Rarity SelectionList contains all RARITIES values."""
-    from grimoire.models.item import RARITIES
-
     loader = ItemCatalogLoader(data_dir=tmp_path)
     app = _make_app(loader)
     async with app.run_test(size=(160, 60)) as pilot:
@@ -92,8 +91,6 @@ async def test_rarity_select_has_all_rarities(tmp_path):
 
 async def test_types_select_has_all_types(tmp_path):
     """Type SelectionList contains all ITEM_TYPES values."""
-    from grimoire.models.item import ITEM_TYPES
-
     loader = ItemCatalogLoader(data_dir=tmp_path)
     app = _make_app(loader)
     async with app.run_test(size=(160, 60)) as pilot:

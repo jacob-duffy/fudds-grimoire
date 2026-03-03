@@ -105,3 +105,13 @@ RARITY_RANK: dict[str, int] = {
 
 # All sub-form IDs used in the UI
 SUBFORM_IDS: list[str] = ["weapon", "armor", "consumable", "wondrous", "currency"]
+
+# Flat list aliases — StrEnum members are strings, so these behave identically
+# to plain lists for all callers that need a list of string values.
+ITEM_TYPES: list[str] = list(ItemType)
+RARITIES: list[str] = list(Rarity)
+DAMAGE_TYPES: list[str] = list(DamageType)
+WEAPON_PROPERTIES: list[str] = list(WeaponProperty)
+DEX_BONUS_OPTIONS: list[str] = list(DexBonus)
+ACTIVATION_OPTIONS: list[str] = list(Activation)
+DENOMINATION_OPTIONS: list[str] = list(Denomination)
