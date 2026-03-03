@@ -5,6 +5,9 @@ from textual.containers import Middle
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
+from grimoire.loaders.tables import LootTableLoader
+from grimoire.ui.add_item import AddItemScreen
+
 
 class PlaceholderScreen(Screen):
     """A generic placeholder screen for features not yet implemented."""
@@ -98,7 +101,7 @@ class MainMenuScreen(Screen):
         item_id = event.item.id
 
         if item_id == "menu-add-item":
-            self.app.push_screen(PlaceholderScreen("Add New Item"))
+            self.app.push_screen(AddItemScreen(table_loader=LootTableLoader()))
         elif item_id == "menu-add-table":
             self.app.push_screen(PlaceholderScreen("Add New Table"))
         elif item_id == "menu-roll-table":

@@ -3,6 +3,7 @@
 from textual.widgets import Footer, Header, Label, ListView
 
 from grimoire.app import GrimoireApp
+from grimoire.ui.add_item import AddItemScreen
 from grimoire.ui.screens import MainMenuScreen, PlaceholderScreen
 
 
@@ -49,9 +50,9 @@ async def test_placeholder_screen_widgets():
     """PlaceholderScreen should render its title, body, Header and Footer."""
     app = GrimoireApp()
     async with app.run_test() as pilot:
-        await pilot.click("#menu-add-item")
+        await pilot.click("#menu-add-table")
         assert isinstance(app.screen, PlaceholderScreen)
-        assert app.screen._screen_title == "Add New Item"
+        assert app.screen._screen_title == "Add New Table"
         assert app.screen.query_one("#placeholder-body", Label) is not None
         assert app.screen.query_one(Header) is not None
         assert app.screen.query_one(Footer) is not None
@@ -61,25 +62,32 @@ async def test_placeholder_back_returns_to_main_menu():
     """Pressing Escape from a placeholder screen should return to MainMenuScreen."""
     app = GrimoireApp()
     async with app.run_test() as pilot:
-        await pilot.click("#menu-add-item")
+        await pilot.click("#menu-add-table")
         assert isinstance(app.screen, PlaceholderScreen)
         await pilot.press("escape")
         assert isinstance(app.screen, MainMenuScreen)
 
 
-async def test_all_menu_items_navigate_to_placeholder():
-    """Each menu item should push a PlaceholderScreen with the correct title."""
-    menu_map = {
-        "menu-add-item": "Add New Item",
-        "menu-add-table": "Add New Table",
-        "menu-roll-table": "Roll Table",
-        "menu-roll-item": "Roll Item",
+async def test_add_item_menu_navigates_to_add_item_screen():
+    """Clicking 'Add New Item' should push AddItemScreen."""
+    app = GrimoireApp()
+    async with app.run_test() as pilot:
+        await pilot.click("#menu-add-item")
+        assert isinstance(app.screen, AddItemScreen)
+
+
+async def test_all_menu_items_navigate_to_expected_screens():
+    """Each menu item pushes the correct screen type."""
+    expected = {
+        "menu-add-item": AddItemScreen,
+        "menu-add-table": PlaceholderScreen,
+        "menu-roll-table": PlaceholderScreen,
+        "menu-roll-item": PlaceholderScreen,
     }
-    for item_id, expected_title in menu_map.items():
+    for item_id, screen_type in expected.items():
         app = GrimoireApp()
         async with app.run_test() as pilot:
             await pilot.click(f"#{item_id}")
-            assert isinstance(app.screen, PlaceholderScreen)
-            assert app.screen._screen_title == expected_title
+            assert isinstance(app.screen, screen_type)
             await pilot.press("escape")
             assert isinstance(app.screen, MainMenuScreen)
