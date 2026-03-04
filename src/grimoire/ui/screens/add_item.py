@@ -22,6 +22,7 @@ from grimoire.ui.constants import (
     WEAPON_PROPERTIES,
 )
 from grimoire.ui.utils import opts
+from grimoire.ui.widgets import FormFieldRow
 from grimoire.utils import num, slugify
 
 
@@ -55,20 +56,6 @@ class AddItemScreen(Screen):
         color: $accent;
         margin-top: 1;
         margin-bottom: 0;
-    }
-
-    .field-row {
-        height: auto;
-        margin-bottom: 1;
-    }
-
-    .field-label {
-        width: 24;
-        padding-top: 1;
-    }
-
-    .field-input {
-        width: 1fr;
     }
 
     #actions {
@@ -119,31 +106,27 @@ class AddItemScreen(Screen):
         with VerticalScroll(id="form-scroll"):
             # ── Basic info (required) ────────────────────────────────────────
             yield Label("Basic Info", classes="section-title")
-            with Horizontal(classes="field-row"):
-                yield Label("Item Type *", classes="field-label")
+            with FormFieldRow("Item Type *"):
                 yield Select(
                     opts(ITEM_TYPES),
                     prompt="Select type…",
                     id="field-type",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Name *", classes="field-label")
+            with FormFieldRow("Name *"):
                 yield Input(
                     placeholder="e.g. Iron Sword",
                     id="field-name",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Rarity *", classes="field-label")
+            with FormFieldRow("Rarity *"):
                 yield Select(
                     opts(RARITIES),
                     prompt="Select rarity…",
                     id="field-rarity",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Link to Table", classes="field-label")
+            with FormFieldRow("Link to Table"):
                 yield Select(
                     [],
                     prompt="None — save to item catalog",
@@ -152,49 +135,41 @@ class AddItemScreen(Screen):
                     disabled=True,
                 )
             yield Label("General", classes="section-title")
-            with Horizontal(classes="field-row"):
-                yield Label("Description", classes="field-label")
+            with FormFieldRow("Description"):
                 yield Input(
                     placeholder="Flavour or mechanical text",
                     id="field-description",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Value (GP)", classes="field-label")
+            with FormFieldRow("Value (GP)"):
                 yield Input(
                     placeholder="e.g. 50",
                     id="field-value-gp",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Weight (lb)", classes="field-label")
+            with FormFieldRow("Weight (lb)"):
                 yield Input(
                     placeholder="e.g. 3.0",
                     id="field-weight-lb",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Attunement", classes="field-label")
-                yield Switch(value=False, id="field-attunement", classes="field-input")
-            with Horizontal(classes="field-row", id="row-attunement-req"):
-                yield Label("  └ Requirements", classes="field-label")
+            with FormFieldRow("Attunement"):
+                yield Switch(value=False, id="field-attunement")
+            with FormFieldRow("  └ Requirements", id="row-attunement-req"):
                 yield Input(
                     placeholder="e.g. by a spellcaster",
                     id="field-attunement-req",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Magical", classes="field-label")
-                yield Switch(value=False, id="field-magical", classes="field-input")
-            with Horizontal(classes="field-row"):
-                yield Label("Tags", classes="field-label")
+            with FormFieldRow("Magical"):
+                yield Switch(value=False, id="field-magical")
+            with FormFieldRow("Tags"):
                 yield Input(
                     placeholder="Comma-separated, e.g. fire, damage",
                     id="field-tags",
                     classes="field-input",
                 )
-            with Horizontal(classes="field-row"):
-                yield Label("Source", classes="field-label")
+            with FormFieldRow("Source"):
                 yield Input(
                     placeholder="e.g. PHB, DMG, homebrew",
                     id="field-source",
@@ -204,23 +179,20 @@ class AddItemScreen(Screen):
             # ── Weapon sub-form ──────────────────────────────────────────────
             with Vertical(id="subform-weapon"):
                 yield Label("Weapon Stats", classes="section-title")
-                with Horizontal(classes="field-row"):
-                    yield Label("Damage Dice", classes="field-label")
+                with FormFieldRow("Damage Dice"):
                     yield Input(
                         placeholder="e.g. 1d8",
                         id="field-weapon-dice",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Damage Type", classes="field-label")
+                with FormFieldRow("Damage Type"):
                     yield Select(
                         opts(DAMAGE_TYPES),
                         prompt="Select damage type…",
                         id="field-weapon-dmg-type",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Properties", classes="field-label")
+                with FormFieldRow("Properties"):
                     yield Input(
                         placeholder=(
                             "Comma-separated: " f"{', '.join(WEAPON_PROPERTIES[:4])}…"
@@ -228,22 +200,19 @@ class AddItemScreen(Screen):
                         id="field-weapon-props",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Range Normal (ft)", classes="field-label")
+                with FormFieldRow("Range Normal (ft)"):
                     yield Input(
                         placeholder="e.g. 80",
                         id="field-weapon-range-normal",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Range Long (ft)", classes="field-label")
+                with FormFieldRow("Range Long (ft)"):
                     yield Input(
                         placeholder="e.g. 320",
                         id="field-weapon-range-long",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Magic Bonus", classes="field-label")
+                with FormFieldRow("Magic Bonus"):
                     yield Select(
                         MAGIC_BONUS_OPTIONS,
                         prompt="None",
@@ -254,37 +223,31 @@ class AddItemScreen(Screen):
             # ── Armor sub-form ───────────────────────────────────────────────
             with Vertical(id="subform-armor"):
                 yield Label("Armor / Shield Stats", classes="section-title")
-                with Horizontal(classes="field-row"):
-                    yield Label("Base AC", classes="field-label")
+                with FormFieldRow("Base AC"):
                     yield Input(
                         placeholder="e.g. 14",
                         id="field-armor-base-ac",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Dex Bonus", classes="field-label")
+                with FormFieldRow("Dex Bonus"):
                     yield Select(
                         opts(DEX_BONUS_OPTIONS),
                         prompt="Select…",
                         id="field-armor-dex-bonus",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Strength Req.", classes="field-label")
+                with FormFieldRow("Strength Req."):
                     yield Input(
                         placeholder="e.g. 15",
                         id="field-armor-str-req",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Stealth Disadv.", classes="field-label")
+                with FormFieldRow("Stealth Disadv."):
                     yield Switch(
                         value=False,
                         id="field-armor-stealth",
-                        classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Magic Bonus", classes="field-label")
+                with FormFieldRow("Magic Bonus"):
                     yield Select(
                         MAGIC_BONUS_OPTIONS,
                         prompt="None",
@@ -295,29 +258,25 @@ class AddItemScreen(Screen):
             # ── Consumable sub-form ──────────────────────────────────────────
             with Vertical(id="subform-consumable"):
                 yield Label("Consumable Stats", classes="section-title")
-                with Horizontal(classes="field-row"):
-                    yield Label("Charges", classes="field-label")
+                with FormFieldRow("Charges"):
                     yield Input(
                         placeholder="e.g. 1",
                         id="field-consumable-charges",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Spell", classes="field-label")
+                with FormFieldRow("Spell"):
                     yield Input(
                         placeholder="e.g. Cure Wounds",
                         id="field-consumable-spell",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Spell Level", classes="field-label")
+                with FormFieldRow("Spell Level"):
                     yield Input(
                         placeholder="0–9",
                         id="field-consumable-spell-level",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Healing Dice", classes="field-label")
+                with FormFieldRow("Healing Dice"):
                     yield Input(
                         placeholder="e.g. 2d4+2",
                         id="field-consumable-healing",
@@ -327,30 +286,26 @@ class AddItemScreen(Screen):
             # ── Wondrous sub-form ────────────────────────────────────────────
             with Vertical(id="subform-wondrous"):
                 yield Label("Wondrous / Charged Item Stats", classes="section-title")
-                with Horizontal(classes="field-row"):
-                    yield Label("Max Charges", classes="field-label")
+                with FormFieldRow("Max Charges"):
                     yield Input(
                         placeholder="e.g. 7",
                         id="field-wondrous-charges",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Recharge", classes="field-label")
+                with FormFieldRow("Recharge"):
                     yield Input(
                         placeholder="e.g. 1d6+1, dawn, never",
                         id="field-wondrous-recharge",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Activation", classes="field-label")
+                with FormFieldRow("Activation"):
                     yield Select(
                         opts(ACTIVATION_OPTIONS),
                         prompt="Select…",
                         id="field-wondrous-activation",
                         classes="field-input",
                     )
-                with Horizontal(classes="field-row"):
-                    yield Label("Effects", classes="field-label")
+                with FormFieldRow("Effects"):
                     yield Input(
                         placeholder="Comma-separated, e.g. Charm Person (1 charge)",
                         id="field-wondrous-effects",
@@ -360,8 +315,7 @@ class AddItemScreen(Screen):
             # ── Currency sub-form ────────────────────────────────────────────
             with Vertical(id="subform-currency"):
                 yield Label("Currency", classes="section-title")
-                with Horizontal(classes="field-row"):
-                    yield Label("Denomination", classes="field-label")
+                with FormFieldRow("Denomination"):
                     yield Select(
                         opts(DENOMINATION_OPTIONS),
                         prompt="Select…",

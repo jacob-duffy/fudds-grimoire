@@ -7,6 +7,7 @@ from textual.widgets import Input, Label, Select, SelectionList
 from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.models.constants import ITEM_TYPES, RARITIES
 from grimoire.ui.screens.roll_item import RollItemScreen
+from grimoire.ui.widgets import ItemCard
 
 # ---------------------------------------------------------------------------
 # Test app helper
@@ -62,7 +63,7 @@ async def test_initial_placeholder_visible(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.pause()
         placeholder = app.screen.query_one("#result-placeholder", Label)
-        card = app.screen.query_one("#result-card")
+        card = app.screen.query_one(ItemCard)
         assert placeholder.display is True
         assert card.display is False
 
@@ -127,7 +128,7 @@ async def test_roll_empty_catalog_keeps_placeholder(tmp_path):
         await pilot.click("#btn-roll")
         await pilot.pause()
         assert app.screen.query_one("#result-placeholder").display is True
-        assert app.screen.query_one("#result-card").display is False
+        assert app.screen.query_one(ItemCard).display is False
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +144,7 @@ async def test_roll_shows_result_card(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        assert app.screen.query_one("#result-card").display is True
+        assert app.screen.query_one(ItemCard).display is True
         assert app.screen.query_one("#result-placeholder").display is False
 
 
@@ -155,7 +156,7 @@ async def test_roll_result_contains_item_name(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        name_label = app.screen.query_one("#result-name", Label)
+        name_label = app.screen.query_one(".card-name", Label)
         assert "Dragon Blade" in str(name_label._Static__content)
 
 
@@ -167,7 +168,7 @@ async def test_roll_result_contains_type(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        type_label = app.screen.query_one("#result-type", Label)
+        type_label = app.screen.query_one(".card-type", Label)
         assert "weapon" in str(type_label._Static__content)
 
 
@@ -179,7 +180,7 @@ async def test_roll_result_contains_rarity(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        rarity_label = app.screen.query_one("#result-rarity", Label)
+        rarity_label = app.screen.query_one(".card-rarity", Label)
         assert "uncommon" in str(rarity_label._Static__content)
 
 
@@ -191,7 +192,7 @@ async def test_roll_result_shows_value_when_present(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        value_label = app.screen.query_one("#result-value", Label)
+        value_label = app.screen.query_one(".card-value", Label)
         assert "75" in str(value_label._Static__content)
 
 
@@ -207,7 +208,7 @@ async def test_roll_result_shows_dash_when_no_value(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.click("#btn-roll")
         await pilot.pause()
-        value_label = app.screen.query_one("#result-value", Label)
+        value_label = app.screen.query_one(".card-value", Label)
         assert "—" in str(value_label._Static__content)
 
 
@@ -241,7 +242,7 @@ async def test_wealth_min_greater_than_max_shows_error(tmp_path):
         await pilot.pause()
         status = app.screen.query_one("#status-bar", Label)
         assert "min" in str(status._Static__content).lower()
-        assert app.screen.query_one("#result-card").display is False
+        assert app.screen.query_one(ItemCard).display is False
 
 
 async def test_wealth_equal_min_max_is_valid(tmp_path):
@@ -270,7 +271,7 @@ async def test_invalid_wealth_input_treated_as_none(tmp_path):
         await pilot.click("#btn-roll")
         await pilot.pause()
         # Should still roll successfully (ignoring bad input)
-        assert app.screen.query_one("#result-card").display is True
+        assert app.screen.query_one(ItemCard).display is True
 
 
 # ---------------------------------------------------------------------------
@@ -293,8 +294,8 @@ async def test_currency_shortcut_with_wealth_range(tmp_path):
         s.query_one("#wealth-max", Input).value = "100"
         await pilot.click("#btn-roll")
         await pilot.pause()
-        assert s.query_one("#result-card").display is True
-        type_label = s.query_one("#result-type", Label)
+        assert s.query_one(ItemCard).display is True
+        type_label = s.query_one(".card-type", Label)
         assert "currency" in str(type_label._Static__content)
 
 
@@ -311,7 +312,7 @@ async def test_currency_shortcut_value_in_range(tmp_path):
         s.query_one("#wealth-max", Input).value = "50"
         await pilot.click("#btn-roll")
         await pilot.pause()
-        value_label = s.query_one("#result-value", Label)
+        value_label = s.query_one(".card-value", Label)
         assert "50" in str(value_label._Static__content)
 
 
@@ -328,7 +329,7 @@ async def test_ctrl_r_rolls(tmp_path):
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.press("ctrl+r")
         await pilot.pause()
-        assert app.screen.query_one("#result-card").display is True
+        assert app.screen.query_one(ItemCard).display is True
 
 
 # ---------------------------------------------------------------------------
@@ -359,7 +360,7 @@ async def test_types_mode_exclude_filters_out_selected_types(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        type_label = s.query_one("#result-type", Label)
+        type_label = s.query_one(".card-type", Label)
         assert "weapon" not in str(type_label._Static__content)
         assert "potion" in str(type_label._Static__content)
 
@@ -382,11 +383,11 @@ async def test_currency_shortcut_no_range_uses_defaults(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        assert s.query_one("#result-card").display is True
-        type_label = s.query_one("#result-type", Label)
+        assert s.query_one(ItemCard).display is True
+        type_label = s.query_one(".card-type", Label)
         assert "currency" in str(type_label._Static__content)
         # value should be within defaults
-        value_text = str(s.query_one("#result-value", Label)._Static__content)
+        value_text = str(s.query_one(".card-value", Label)._Static__content)
         assert "gp" in value_text
         # Extract the numeric portion and verify it's within default range
         raw = value_text.split(":")[-1].replace("gp", "").strip()
@@ -406,7 +407,7 @@ async def test_currency_shortcut_rarity_ignored(tmp_path):
         await pilot.click("#btn-roll")
         await pilot.pause()
         # Should still succeed — rarity filter is bypassed for currency
-        assert s.query_one("#result-card").display is True
+        assert s.query_one(ItemCard).display is True
 
 
 # ---------------------------------------------------------------------------
@@ -477,7 +478,7 @@ async def test_rarity_comparator_geq_filters_results(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        rarity_label = s.query_one("#result-rarity", Label)
+        rarity_label = s.query_one(".card-rarity", Label)
         result_rarity = str(rarity_label._Static__content).split(":")[-1].strip()
         assert result_rarity in ("rare", "very rare", "legendary", "artifact")
 
@@ -499,6 +500,6 @@ async def test_rarity_comparator_no_ref_treats_as_no_filter(tmp_path):
         # (result may be None if no items pass, but no crash)
         # The weapon has rarity="common" which won't match lt with no ref,
         # so we just assert no uncaught exception (either card shown or error).
-        assert s.query_one("#result-card").display is True or "No items match" in str(
+        assert s.query_one(ItemCard).display is True or "No items match" in str(
             s.query_one("#status-bar", Label)._Static__content
         )

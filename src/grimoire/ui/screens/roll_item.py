@@ -22,6 +22,7 @@ from grimoire.ui.utils import (
     rarity_selections,
     type_selections,
 )
+from grimoire.ui.widgets import ItemCard
 
 
 class RollItemScreen(Screen):
@@ -154,27 +155,6 @@ class RollItemScreen(Screen):
         text-style: italic;
         margin-top: 2;
     }
-
-    #result-card {
-        display: none;
-        height: auto;
-        border: solid $primary;
-        padding: 1 2;
-        margin-top: 1;
-        width: 100%;
-    }
-
-    #result-name {
-        text-style: bold;
-        color: $accent;
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    .result-field {
-        width: 100%;
-        margin-bottom: 0;
-    }
     """
 
     def __init__(
@@ -251,12 +231,7 @@ class RollItemScreen(Screen):
                     "Set filters and press Roll (Ctrl+R)",
                     id="result-placeholder",
                 )
-                with Vertical(id="result-card"):
-                    yield Label("", id="result-name")
-                    yield Label("", id="result-type", classes="result-field")
-                    yield Label("", id="result-rarity", classes="result-field")
-                    yield Label("", id="result-value", classes="result-field")
-                    yield Label("", id="result-description", classes="result-field")
+                yield ItemCard()
 
         yield Footer()
 
@@ -331,7 +306,7 @@ class RollItemScreen(Screen):
 
         if result is None:
             status.update("No items match the current filters.")
-            self.query_one("#result-card").display = False
+            self.query_one(ItemCard).clear()
             self.query_one("#result-placeholder").display = True
             return
 
@@ -339,29 +314,5 @@ class RollItemScreen(Screen):
 
     def _display_result(self, item: dict) -> None:
         """Populate the result card with *item* data and make it visible."""
-        placeholder = self.query_one("#result-placeholder", Label)
-        card = self.query_one("#result-card")
-
-        placeholder.display = False
-
-        self.query_one("#result-name", Label).update(
-            item.get("name", item.get("_id", "Unknown Item"))
-        )
-        self.query_one("#result-type", Label).update(f"Type:   {item.get('type', '—')}")
-        self.query_one("#result-rarity", Label).update(
-            f"Rarity: {item.get('rarity', '—')}"
-        )
-
-        value = item.get("value_gp")
-        value_text = f"{value} gp" if value is not None else "—"
-        self.query_one("#result-value", Label).update(f"Value:  {value_text}")
-
-        desc = item.get("description", "")
-        desc_label = self.query_one("#result-description", Label)
-        if desc:
-            desc_label.update(f"\n{desc}")
-            desc_label.display = True
-        else:
-            desc_label.display = False
-
-        card.display = True
+        self.query_one("#result-placeholder", Label).display = False
+        self.query_one(ItemCard).populate(item)

@@ -10,6 +10,7 @@ from textual.widgets import Button, Label, ListView, Select
 from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.loaders.tables import _TABLE_SCHEMA_COMMENT, LootTableLoader
 from grimoire.ui.screens.roll_table import RollTableScreen
+from grimoire.ui.widgets import ItemCard
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -149,9 +150,7 @@ async def test_initial_item_card_hidden(tmp_path):
     app = _make_app(loader)
     async with app.run_test(size=(160, 60)) as pilot:
         await pilot.pause()
-        from textual.containers import Vertical
-
-        card = app.screen.query_one("#item-card", Vertical)
+        card = app.screen.query_one(ItemCard)
         assert card.display is False
 
 
@@ -223,9 +222,7 @@ async def test_roll_without_selection_shows_error(tmp_path):
         await pilot.pause()
         status = app.screen.query_one("#status-bar", Label)
         assert str(status._Static__content).strip() != ""
-        from textual.containers import Vertical
-
-        card = app.screen.query_one("#item-card", Vertical)
+        card = app.screen.query_one(ItemCard)
         assert card.display is False
 
 
@@ -250,9 +247,7 @@ async def test_roll_inline_item_shows_card(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        from textual.containers import Vertical
-
-        card = app.screen.query_one("#item-card", Vertical)
+        card = app.screen.query_one(ItemCard)
         assert card.display is True
 
 
@@ -272,9 +267,7 @@ async def test_roll_via_keyboard_shortcut(tmp_path):
         await pilot.pause()
         await pilot.press("ctrl+r")
         await pilot.pause()
-        from textual.containers import Vertical
-
-        card = app.screen.query_one("#item-card", Vertical)
+        card = app.screen.query_one(ItemCard)
         assert card.display is True
 
 
@@ -297,9 +290,7 @@ async def test_roll_empty_table_shows_error(tmp_path):
         await pilot.pause()
         status = app.screen.query_one("#status-bar", Label)
         assert str(status._Static__content).strip() != ""
-        from textual.containers import Vertical
-
-        card = app.screen.query_one("#item-card", Vertical)
+        card = app.screen.query_one(ItemCard)
         assert card.display is False
 
 
@@ -349,7 +340,7 @@ async def test_result_card_shows_item_name(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        card_name = app.screen.query_one("#card-name", Label)
+        card_name = app.screen.query_one(".card-name", Label)
         assert "Ancient Shield" in str(card_name._Static__content)
 
 
@@ -379,11 +370,11 @@ async def test_card_shows_type_rarity_value(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        assert "gem" in str(app.screen.query_one("#card-type", Label)._Static__content)
+        assert "gem" in str(app.screen.query_one(".card-type", Label)._Static__content)
         assert "uncommon" in str(
-            app.screen.query_one("#card-rarity", Label)._Static__content
+            app.screen.query_one(".card-rarity", Label)._Static__content
         )
-        assert "50" in str(app.screen.query_one("#card-value", Label)._Static__content)
+        assert "50" in str(app.screen.query_one(".card-value", Label)._Static__content)
 
 
 async def test_table_info_label_updated_after_roll(tmp_path):
@@ -433,13 +424,11 @@ async def test_switching_table_clears_card(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        from textual.containers import Vertical
-
-        assert app.screen.query_one("#item-card", Vertical).display is True
+        assert app.screen.query_one(ItemCard).display is True
         # Switch to the other table → card must be hidden again.
         app.screen.query_one("#table-select", Select).value = str(table_b)
         await pilot.pause()
-        assert app.screen.query_one("#item-card", Vertical).display is False
+        assert app.screen.query_one(ItemCard).display is False
 
 
 # ---------------------------------------------------------------------------
@@ -491,7 +480,7 @@ async def test_item_ref_resolved_in_card_after_roll(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        card_name = app.screen.query_one("#card-name", Label)
+        card_name = app.screen.query_one(".card-name", Label)
         assert "Iron Sword" in str(card_name._Static__content)
 
 
@@ -627,7 +616,7 @@ async def test_reference_roll_resolves_to_sub_table_item(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        card_name = app.screen.query_one("#card-name", Label)
+        card_name = app.screen.query_one(".card-name", Label)
         assert "Shadow Gem" in str(card_name._Static__content)
 
 
@@ -664,7 +653,7 @@ async def test_card_shows_description_when_present(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        desc_label = app.screen.query_one("#card-desc", Label)
+        desc_label = app.screen.query_one(".card-desc", Label)
         assert desc_label.display is True
         assert "Glows faintly" in str(desc_label._Static__content)
 
@@ -685,7 +674,7 @@ async def test_card_description_hidden_when_absent(tmp_path):
         await pilot.pause()
         await pilot.click("#btn-roll")
         await pilot.pause()
-        desc_label = app.screen.query_one("#card-desc", Label)
+        desc_label = app.screen.query_one(".card-desc", Label)
         assert desc_label.display is False
 
 

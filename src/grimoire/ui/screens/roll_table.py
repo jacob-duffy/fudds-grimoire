@@ -20,6 +20,7 @@ from textual.widgets import (
 from grimoire.loaders.items import ItemCatalogLoader
 from grimoire.loaders.tables import LootTableLoader
 from grimoire.models.roller import load_all_items
+from grimoire.ui.widgets import ItemCard
 
 
 class RollTableScreen(Screen):
@@ -122,26 +123,6 @@ class RollTableScreen(Screen):
         margin-bottom: 1;
     }
 
-    #item-card {
-        display: none;
-        height: auto;
-        border: solid $primary;
-        padding: 1 2;
-        margin-top: 1;
-        width: 100%;
-    }
-
-    #card-name {
-        text-style: bold;
-        color: $accent;
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    .card-field {
-        width: 100%;
-    }
-
     #status-bar {
         height: 1;
         padding: 0 1;
@@ -222,12 +203,7 @@ class RollTableScreen(Screen):
             # ── Right: item card ──────────────────────────────────────
             with Vertical(id="card-pane"):
                 yield Label("", id="table-info")
-                with Vertical(id="item-card"):
-                    yield Label("", id="card-name")
-                    yield Label("", id="card-type", classes="card-field")
-                    yield Label("", id="card-rarity", classes="card-field")
-                    yield Label("", id="card-value", classes="card-field")
-                    yield Label("", id="card-desc", classes="card-field")
+                yield ItemCard()
 
         yield Footer()
 
@@ -408,33 +384,13 @@ class RollTableScreen(Screen):
 
     def _show_in_card(self, item: dict) -> None:
         """Populate the detail card with the given item's fields."""
-        name = item.get("name") or item.get("_id") or "Unknown Item"
-        type_ = item.get("type", "—")
-        rarity = item.get("rarity", "—")
-        value = item.get("value_gp")
-        value_text = f"{value} gp" if value is not None else "—"
-        desc = item.get("description", "")
-
         self.query_one("#hint-label", Label).display = False
-        card = self.query_one("#item-card", Vertical)
-        card.display = True
-
-        self.query_one("#card-name", Label).update(name)
-        self.query_one("#card-type", Label).update(f"Type:   {type_}")
-        self.query_one("#card-rarity", Label).update(f"Rarity: {rarity}")
-        self.query_one("#card-value", Label).update(f"Value:  {value_text}")
-
-        desc_label = self.query_one("#card-desc", Label)
-        if desc:
-            desc_label.update(f"\n{desc}")
-            desc_label.display = True
-        else:
-            desc_label.display = False
+        self.query_one(ItemCard).populate(item)
 
     def _clear_card(self) -> None:
         """Reset the card panel to its initial placeholder state."""
         self.query_one("#hint-label", Label).display = True
-        self.query_one("#item-card", Vertical).display = False
+        self.query_one(ItemCard).clear()
         self.query_one("#table-info", Label).update("")
 
     def _clear_list(self) -> None:
