@@ -18,6 +18,7 @@ from textual.widgets import (
 )
 
 from grimoire.loaders.items import ItemCatalogLoader
+from grimoire.loaders.resolver import resolve_table_entries
 from grimoire.loaders.tables import LootTableLoader
 from grimoire.models.roller import load_all_items
 from grimoire.ui.widgets import ItemCard
@@ -279,8 +280,9 @@ class RollTableScreen(Screen):
             if "_id" in item
         }
 
-        self._resolved_entries = []
-        self._expand_entries(table.get("entries", []), item_index, frozenset())
+        self._resolved_entries = resolve_table_entries(
+            table.get("entries", []), item_index, self._table_loader
+        )
 
         list_widget = self.query_one("#items-list", ListView)
         list_widget.clear()
@@ -291,70 +293,6 @@ class RollTableScreen(Screen):
         has_entries = bool(self._resolved_entries)
         self.query_one("#list-placeholder", Label).display = not has_entries
         list_widget.display = has_entries
-
-    def _expand_entries(
-        self,
-        entries: list,
-        item_index: dict,
-        visited: frozenset[str],
-        parent_weight: int = 1,
-    ) -> None:
-        """Recursively resolve *entries* into ``self._resolved_entries``.
-
-        Parameters
-        ----------
-        entries:
-            Raw entry dicts from a table's ``entries`` list.
-        item_index:
-            Pre-built ``id → item`` map from the item catalog.
-        visited:
-            Set of table IDs already seen on the current resolution path.
-            Used to detect and break reference cycles.
-        parent_weight:
-            Cumulative weight inherited from ancestor ``reference`` entries.
-            Each entry's effective weight is ``entry_weight × parent_weight``.
-        """
-        for entry in entries:
-            weight = max(int(entry.get("weight", 1)), 1) * parent_weight
-
-            if "item" in entry:
-                item = dict(entry["item"])
-                item.setdefault("_id", item.get("name", "inline_item"))
-                item["_weight"] = weight
-                self._resolved_entries.append(item)
-
-            elif "item_ref" in entry:
-                item_id = str(entry["item_ref"])
-                found = item_index.get(item_id)
-                if found is not None:
-                    item = dict(found)
-                    item["_weight"] = weight
-                    self._resolved_entries.append(item)
-                else:
-                    self._resolved_entries.append(
-                        {"_id": item_id, "name": item_id, "_weight": weight}
-                    )
-
-            elif "reference" in entry:
-                ref_id = str(entry["reference"])
-                if ref_id not in visited:
-                    sub_table = self._table_loader.find_by_id(ref_id)
-                    if sub_table is not None:
-                        self._expand_entries(
-                            sub_table.get("entries", []),
-                            item_index,
-                            visited | {ref_id},
-                            weight,
-                        )
-                        continue
-                # Sub-table not found or cycle detected — show stub.
-                self._resolved_entries.append(
-                    {
-                        "_id": f"_ref:{ref_id}",
-                        "name": f"[Table: {ref_id}]",
-                        "_weight": weight,
-                    }
-                )
 
     def _do_roll(self) -> None:
         """Perform a weighted random pick and update the highlighted entry."""

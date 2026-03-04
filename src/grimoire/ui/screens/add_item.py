@@ -21,6 +21,12 @@ from grimoire.ui.constants import (
     RARITIES,
     WEAPON_PROPERTIES,
 )
+from grimoire.ui.forms.collectors import (
+    collect_armor,
+    collect_consumable,
+    collect_weapon,
+    collect_wondrous,
+)
 from grimoire.ui.utils import opts
 from grimoire.ui.widgets import FormFieldRow
 from grimoire.utils import num, slugify
@@ -468,16 +474,39 @@ class AddItemScreen(Screen):
         subform = TYPE_TO_SUBFORM.get(item_type)
 
         if subform == "weapon":
-            if data := self._collect_weapon():
+            if data := collect_weapon(
+                self._inp("field-weapon-dice"),
+                self._sel("field-weapon-dmg-type"),
+                self._inp("field-weapon-props"),
+                self._inp("field-weapon-range-normal"),
+                self._inp("field-weapon-range-long"),
+                self._sel("field-weapon-magic-bonus"),
+            ):
                 item_data["weapon"] = data
         elif subform == "armor":
-            if data := self._collect_armor():
+            if data := collect_armor(
+                self._inp("field-armor-base-ac"),
+                self._sel("field-armor-dex-bonus"),
+                self._inp("field-armor-str-req"),
+                self.query_one("#field-armor-stealth", Switch).value,
+                self._sel("field-armor-magic-bonus"),
+            ):
                 item_data["armor"] = data
         elif subform == "consumable":
-            if data := self._collect_consumable():
+            if data := collect_consumable(
+                self._inp("field-consumable-charges"),
+                self._inp("field-consumable-spell"),
+                self._inp("field-consumable-spell-level"),
+                self._inp("field-consumable-healing"),
+            ):
                 item_data["consumable"] = data
         elif subform == "wondrous":
-            if data := self._collect_wondrous():
+            if data := collect_wondrous(
+                self._inp("field-wondrous-charges"),
+                self._inp("field-wondrous-recharge"),
+                self._sel("field-wondrous-activation"),
+                self._inp("field-wondrous-effects"),
+            ):
                 item_data["wondrous"] = data
         elif subform == "currency":
             if denom := self._sel("field-currency-denom"):
@@ -505,90 +534,3 @@ class AddItemScreen(Screen):
                 )
         except Exception as exc:  # noqa: BLE001
             status.update(f"Error saving: {exc}")
-
-    # ------------------------------------------------------------------
-    # Sub-form collectors
-    # ------------------------------------------------------------------
-
-    def _collect_weapon(self) -> dict:
-        """Read weapon sub-form fields and return a populated dict (may be empty)."""
-        weapon: dict = {}
-        dice = self._inp("field-weapon-dice")
-        dmg_type = self._sel("field-weapon-dmg-type")
-        if dice and dmg_type:
-            weapon["damage"] = {"dice": dice, "type": dmg_type}
-        if props_raw := self._inp("field-weapon-props"):
-            weapon["properties"] = [
-                p.strip() for p in props_raw.split(",") if p.strip()
-            ]
-        if rn := self._inp("field-weapon-range-normal"):
-            try:
-                weapon["range_normal_ft"] = int(rn)
-            except ValueError:
-                pass
-        if rl := self._inp("field-weapon-range-long"):
-            try:
-                weapon["range_long_ft"] = int(rl)
-            except ValueError:
-                pass
-        if mb := self._sel("field-weapon-magic-bonus"):
-            if mb:
-                weapon["magic_bonus"] = int(mb)
-        return weapon
-
-    def _collect_armor(self) -> dict:
-        """Read armor sub-form fields and return a populated dict (may be empty)."""
-        armor: dict = {}
-        if bac := self._inp("field-armor-base-ac"):
-            try:
-                armor["base_ac"] = int(bac)
-            except ValueError:
-                pass
-        if db := self._sel("field-armor-dex-bonus"):
-            armor["dex_bonus"] = db
-        if sr := self._inp("field-armor-str-req"):
-            try:
-                armor["strength_requirement"] = int(sr)
-            except ValueError:
-                pass
-        if self.query_one("#field-armor-stealth", Switch).value:
-            armor["stealth_disadvantage"] = True
-        if mb := self._sel("field-armor-magic-bonus"):
-            if mb:
-                armor["magic_bonus"] = int(mb)
-        return armor
-
-    def _collect_consumable(self) -> dict:
-        """Read consumable subform fields and return a populated dict (may be empty)."""
-        consumable: dict = {}
-        if ch := self._inp("field-consumable-charges"):
-            try:
-                consumable["charges"] = int(ch)
-            except ValueError:
-                pass
-        if sp := self._inp("field-consumable-spell"):
-            consumable["spell"] = sp
-        if sl := self._inp("field-consumable-spell-level"):
-            try:
-                consumable["spell_level"] = int(sl)
-            except ValueError:
-                pass
-        if hd := self._inp("field-consumable-healing"):
-            consumable["healing_dice"] = hd
-        return consumable
-
-    def _collect_wondrous(self) -> dict:
-        """Read wondrous sub-form fields and return a populated dict (may be empty)."""
-        wondrous: dict = {}
-        if ch := self._inp("field-wondrous-charges"):
-            try:
-                wondrous["charges"] = int(ch)
-            except ValueError:
-                pass
-        if rc := self._inp("field-wondrous-recharge"):
-            wondrous["recharge"] = rc
-        if act := self._sel("field-wondrous-activation"):
-            wondrous["activation"] = act
-        if eff_raw := self._inp("field-wondrous-effects"):
-            wondrous["effects"] = [e.strip() for e in eff_raw.split(",") if e.strip()]
-        return wondrous
